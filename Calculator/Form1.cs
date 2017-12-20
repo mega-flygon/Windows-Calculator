@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -18,12 +18,13 @@ namespace Calculator
         private double runningTotal = 0;
         private Operation currentOperation = Operation.ADD;
         private bool equalsJustPressed = false; // set this to false everytime it's used in logic
-        private bool lockUntilClearPressed = false; // locks calculator when user divided by zero
+        private ArrayList expressionTracker; // used to track the expression for displaying
 
         public Form1()
         {
             InitializeComponent();
             display.SelectionAlignment = HorizontalAlignment.Right;
+            expressionTracker = new ArrayList();
         }
 
         private void numButton_Click(object sender, EventArgs e)
@@ -170,8 +171,6 @@ namespace Calculator
             {
                 display.Font = new Font("Microsoft YaHei UI", 12);
                 display.Text = "Cannot divide by zero. \nPress C to start over.";
-                //display.Font = new Font("Microsoft YaHei UI", 24);
-                
             }
             else
             {
@@ -244,6 +243,7 @@ namespace Calculator
         {
             currentNumber = 0;
             runningTotal = 0;
+            expressionTracker.Clear();
             currentOperation = Operation.ADD;
             display.Text = Convert.ToString(currentNumber);
             display.SelectionAlignment = HorizontalAlignment.Right;
