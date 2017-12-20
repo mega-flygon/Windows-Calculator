@@ -16,3 +16,4 @@ C:\dev\c#\Calculator\Calculator\obj\Debug\Calculator.csproj.GenerateResource.Cac
 C:\dev\c#\Calculator\Calculator\obj\Debug\Calculator.csproj.CoreCompileInputs.cache
 C:\dev\c#\Calculator\Calculator\obj\Debug\Calculator.exe
 C:\dev\c#\Calculator\Calculator\obj\Debug\Calculator.pdb
+C:\dev\c#\Calculator\Calculator\obj\Debug\Calculator.csprojResolveAssemblyReference.cache

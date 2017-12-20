@@ -22,10 +22,10 @@ namespace Calculator
         private ArrayList expressionTracker; // used to track the expression for displaying
         private Button lastButtonPressed;
         char lastDigitPressed; // used to check for dividing by zero
+        char lastButtonPressedText = 'z';
 
         public Form1()
         {
-            System.Diagnostics.Debug.WriteLine("STARTED");
             InitializeComponent();
             display.SelectionAlignment = HorizontalAlignment.Right;
             expressionTracker = new ArrayList();
@@ -45,19 +45,17 @@ namespace Calculator
         private void button_Click(object sender, EventArgs e) 
         {
             lastButtonPressed = (Button) sender;
-            System.Diagnostics.Debug.WriteLine("PRESSED: " + lastButtonPressed.Text);
 
             // If the sender is a number button
             if (isNumberButton((Button) sender))
             {
                 // Convert the string to a character
                 lastDigitPressed = lastButtonPressed.Text.ElementAt(0);
-                System.Diagnostics.Debug.WriteLine("lastDigitPressed = " + lastButtonPressed.Text.ElementAt(0));
+
                 // If equals is pressed then another number is pressed, the user is trying to start
                 // a new expression, so we need to clear the running total.
                 if (equalsJustPressed)
                 {
-                    System.Diagnostics.Debug.WriteLine("entered if (equalsJustPressed) in button_click (isNumberButton = true)");
                     runningTotal = 0;
                     equalsJustPressed = false;
                 }
@@ -78,53 +76,149 @@ namespace Calculator
             {
 
                 // Operator buttons
-                // first check to see if the user has tried to divide by 0
-                if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
+
+                // Test if the user has pressed two operators in a row. If they have, switch to the
+                // else statement which sets currentOperator to the most recent operator selected
+                if (lastButtonPressedText != '+' && lastButtonPressedText != '-'
+                    && lastButtonPressedText != '*' && lastButtonPressedText != '/')
                 {
-                    display.Text = "Cannot divide by zero.";
-                    System.Diagnostics.Debug.WriteLine("----- error -----");
-                    // set equalsJustPressed to true to simulate C being pressed
-                    equalsJustPressed = true;
-                    currentOperation = Operation.ADD;
-                }
-                else
-                {
-                    if (sender == addButton) addButton_Click(sender, e);
-                    if (sender == subtractButton) subtractButton_Click(sender, e);
-                    if (sender == multiplyButton) multiplyButton_Click(sender, e);
-                    if (sender == divideButton) divideButton_Click(sender, e);
-                }
+                    // first check to see if the user has tried to divide by 0
+                    if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
+                    {
+                        display.Text = "Cannot divide by zero.";
+                        // set equalsJustPressed to true to simulate C being pressed
+                        equalsJustPressed = true;
+                        // set the operation to ADD so that performCurrentOperation doesn't switch to the 
+                        // DIVIDE case the next time the user clicks an operation.
+                        currentOperation = Operation.ADD;
+                    }
+                    else
+                    {
+                        if (sender == addButton) addButton_Click(sender, e);
+                        if (sender == subtractButton) subtractButton_Click(sender, e);
+                        if (sender == multiplyButton) multiplyButton_Click(sender, e);
+                        if (sender == divideButton) divideButton_Click(sender, e);
+                    }
+                }             
             }
-            
+            lastButtonPressedText = lastButtonPressed.Text.ElementAt(0);
         }
 
-        private void operatorButton_Click(object sender, EventArgs e)
+        private void equalsButton_Click(object sender, EventArgs e)
         {
-            
+            // Same logic as in button_Click: check for division by zero.
+            if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
+            {
+                display.Text = "Cannot divide by zero.";
+                // set equalsJustPressed to true to simulate C being pressed
+                equalsJustPressed = true;
+                // set the operation to ADD so that performCurrentOperation doesn't switch to the 
+                // DIVIDE case the next time the user clicks an operation.
+                currentOperation = Operation.ADD;
+            }
+            else
+            {
+                performCurrentOperation();
+                equalsJustPressed = true;
+                currentOperation = Operation.ADD;
+                display.Text = Convert.ToString(runningTotal);
+                display.SelectionAlignment = HorizontalAlignment.Right;
+            }
         }
 
-/*        private void numButton_Click(object sender, EventArgs e)
+        public void performCurrentOperation()
         {
-            lastButtonPressed = (Button) sender;
+            switch (currentOperation)
+            {
+                case Operation.ADD:
+                    runningTotal += currentNumber;
+                    break;
+                case Operation.SUBTRACT:
+                    runningTotal -= currentNumber;
+                    break;
+                case Operation.MULTIPLY:
+                    runningTotal *= currentNumber;
+                    break;
+                case Operation.DIVIDE:
+                    runningTotal /= currentNumber;
+                    break;
+            };
+            currentNumber = 0;
+        }
+
+        private void decimalButton_Click(object sender, EventArgs e)
+        {
+            currentNumber = 0;
+            display.Text = "TOO HARD";
+        }
+
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            // This logic prevents the calculator from performing the previous 
+            // operation twice
+            if (equalsJustPressed) 
+            {
+                currentNumber = 0;
+                currentOperation = Operation.ADD;
+                equalsJustPressed = false; 
+            }
+            performCurrentOperation();
+            display.Text = Convert.ToString(runningTotal);
+            display.SelectionAlignment = HorizontalAlignment.Right;
+            currentOperation = Operation.ADD;
+        }
+
+        private void subtractButton_Click(object sender, EventArgs e)
+        {
             if (equalsJustPressed)
             {
-                runningTotal = 0;
+                currentNumber = 0;
+                currentOperation = Operation.ADD;
                 equalsJustPressed = false;
             }
+            performCurrentOperation();
+            display.Text = Convert.ToString(runningTotal);
+            display.SelectionAlignment = HorizontalAlignment.Right;
+            currentOperation = Operation.SUBTRACT;
+        }
 
-            if (sender == button0) button0_Click(sender, e);
-            if (sender == button1) button1_Click(sender, e);
-            if (sender == button2) button2_Click(sender, e);
-            if (sender == button3) button3_Click(sender, e);
-            if (sender == button4) button4_Click(sender, e);
-            if (sender == button5) button5_Click(sender, e);
-            if (sender == button6) button6_Click(sender, e);
-            if (sender == button7) button7_Click(sender, e);
-            if (sender == button8) button8_Click(sender, e);
-            if (sender == button9) button9_Click(sender, e);
+        private void multiplyButton_Click(object sender, EventArgs e)
+        {
+            if (equalsJustPressed)
+            {
+                currentNumber = 1;
+                currentOperation = Operation.MULTIPLY;
+                equalsJustPressed = false;
+            }
+            performCurrentOperation();
+            display.Text = Convert.ToString(runningTotal);
+            display.SelectionAlignment = HorizontalAlignment.Right;
+            currentOperation = Operation.MULTIPLY;
+        }
 
-        } 
-*/
+        private void divideButton_Click(object sender, EventArgs e)
+        {
+            if (equalsJustPressed)
+            {
+                currentNumber = 1;
+                currentOperation = Operation.MULTIPLY;
+                equalsJustPressed = false;
+            }
+            performCurrentOperation();
+            display.Text = Convert.ToString(runningTotal);
+            display.SelectionAlignment = HorizontalAlignment.Right;
+            currentOperation = Operation.DIVIDE;
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            currentNumber = 0;
+            runningTotal = 0;
+            expressionTracker.Clear();
+            currentOperation = Operation.ADD;
+            display.Text = Convert.ToString(currentNumber);
+            display.SelectionAlignment = HorizontalAlignment.Right;
+        }
 
         private void button0_Click(object sender, EventArgs e)
         {
@@ -204,110 +298,6 @@ namespace Calculator
             currentNumber += 9;
             display.Text = Convert.ToString(currentNumber);
             display.SelectionAlignment = HorizontalAlignment.Right;
-        }
-
-        private void equalsButton_Click(object sender, EventArgs e)
-        {
-            performCurrentOperation();
-            equalsJustPressed = true;
-            currentOperation = Operation.ADD;
-            display.Text = Convert.ToString(runningTotal);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-        }
-
-        public void performCurrentOperation()
-        {
-            switch (currentOperation)
-            {
-                case Operation.ADD:
-                    runningTotal += currentNumber;
-                    break;
-                case Operation.SUBTRACT:
-                    runningTotal -= currentNumber;
-                    break;
-                case Operation.MULTIPLY:
-                    runningTotal *= currentNumber;
-                    break;
-                case Operation.DIVIDE:
-                    if (currentNumber == 0)
-                    runningTotal /= currentNumber;
-                    break;
-            };
-            currentNumber = 0;
-        }
-
-        private void addButton_Click(object sender, EventArgs e)
-        {
-            // This logic prevents the calculator from performing the previous 
-            // operation twice
-            if (equalsJustPressed) 
-            {
-                currentNumber = 0;
-                currentOperation = Operation.ADD;
-                equalsJustPressed = false; 
-            }
-            performCurrentOperation();
-            display.Text = Convert.ToString(runningTotal);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-            currentOperation = Operation.ADD;
-        }
-
-        private void subtractButton_Click(object sender, EventArgs e)
-        {
-            if (equalsJustPressed)
-            {
-                currentNumber = 0;
-                currentOperation = Operation.ADD;
-                equalsJustPressed = false;
-            }
-            performCurrentOperation();
-            display.Text = Convert.ToString(runningTotal);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-            currentOperation = Operation.SUBTRACT;
-        }
-
-        private void multiplyButton_Click(object sender, EventArgs e)
-        {
-            if (equalsJustPressed)
-            {
-                currentNumber = 1;
-                currentOperation = Operation.MULTIPLY;
-                equalsJustPressed = false;
-            }
-            performCurrentOperation();
-            display.Text = Convert.ToString(runningTotal);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-            currentOperation = Operation.MULTIPLY;
-        }
-
-        private void divideButton_Click(object sender, EventArgs e)
-        {
-            if (equalsJustPressed)
-            {
-                currentNumber = 1;
-                currentOperation = Operation.MULTIPLY;
-                equalsJustPressed = false;
-            }
-            performCurrentOperation();
-            display.Text = Convert.ToString(runningTotal);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-            currentOperation = Operation.DIVIDE;
-        }
-
-        private void clearButton_Click(object sender, EventArgs e)
-        {
-            currentNumber = 0;
-            runningTotal = 0;
-            expressionTracker.Clear();
-            currentOperation = Operation.ADD;
-            display.Text = Convert.ToString(currentNumber);
-            display.SelectionAlignment = HorizontalAlignment.Right;
-        }
-
-        private void decimalButton_Click(object sender, EventArgs e)
-        {
-            currentNumber = 0;
-            display.Text = "TOO HARD";
         }
     }
 }
