@@ -25,6 +25,7 @@ namespace Calculator
 
         public Form1()
         {
+            System.Diagnostics.Debug.WriteLine("STARTED");
             InitializeComponent();
             display.SelectionAlignment = HorizontalAlignment.Right;
             expressionTracker = new ArrayList();
@@ -38,23 +39,25 @@ namespace Calculator
             if (t <= 57 && t >= 48) return true;
             else return false;
         }
-
+         
         // This purpose of this method is to abstract some important steps necessary to take each
         // time a button is pressed. The sender is then passed off to the appropriate event handler.
         private void button_Click(object sender, EventArgs e) 
         {
             lastButtonPressed = (Button) sender;
+            System.Diagnostics.Debug.WriteLine("PRESSED: " + lastButtonPressed.Text);
 
             // If the sender is a number button
             if (isNumberButton((Button) sender))
             {
                 // Convert the string to a character
                 lastDigitPressed = lastButtonPressed.Text.ElementAt(0);
-
+                System.Diagnostics.Debug.WriteLine("lastDigitPressed = " + lastButtonPressed.Text.ElementAt(0));
                 // If equals is pressed then another number is pressed, the user is trying to start
                 // a new expression, so we need to clear the running total.
                 if (equalsJustPressed)
                 {
+                    System.Diagnostics.Debug.WriteLine("entered if (equalsJustPressed) in button_click (isNumberButton = true)");
                     runningTotal = 0;
                     equalsJustPressed = false;
                 }
@@ -79,8 +82,10 @@ namespace Calculator
                 if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
                 {
                     display.Text = "Cannot divide by zero.";
+                    System.Diagnostics.Debug.WriteLine("----- error -----");
                     // set equalsJustPressed to true to simulate C being pressed
                     equalsJustPressed = true;
+                    currentOperation = Operation.ADD;
                 }
                 else
                 {
@@ -225,13 +230,7 @@ namespace Calculator
                     break;
                 case Operation.DIVIDE:
                     if (currentNumber == 0)
-                    {
-                        display.Text = "Cannot divide by zero. \nPress C to start over.";
-                    }
-                    else
-                    {
-                        runningTotal /= currentNumber;
-                    }
+                    runningTotal /= currentNumber;
                     break;
             };
             currentNumber = 0;
