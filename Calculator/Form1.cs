@@ -13,12 +13,15 @@ namespace Calculator
     public partial class Form1 : Form
     {
         enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE };
+        enum ButtonType { NUMBER, OPERATION, OTHER };
 
         private double currentNumber = 0;
         private double runningTotal = 0;
         private Operation currentOperation = Operation.ADD;
         private bool equalsJustPressed = false; // set this to false everytime it's used in logic
         private ArrayList expressionTracker; // used to track the expression for displaying
+        private Button lastButtonPressed;
+        char lastDigitPressed; // used to check for dividing by zero
 
         public Form1()
         {
@@ -27,8 +30,77 @@ namespace Calculator
             expressionTracker = new ArrayList();
         }
 
-        private void numButton_Click(object sender, EventArgs e)
+        // Converts the argument's text to a character and uses its ASCII key to 
+        // determine if it's a number
+        private bool isNumberButton(Button button) 
         {
+            char t = button.Text.ElementAt(0);
+            if (t <= 57 && t >= 48) return true;
+            else return false;
+        }
+
+        // This purpose of this method is to abstract some important steps necessary to take each
+        // time a button is pressed. The sender is then passed off to the appropriate event handler.
+        private void button_Click(object sender, EventArgs e) 
+        {
+            lastButtonPressed = (Button) sender;
+
+            // If the sender is a number button
+            if (isNumberButton((Button) sender))
+            {
+                // Convert the string to a character
+                lastDigitPressed = lastButtonPressed.Text.ElementAt(0);
+
+                // If equals is pressed then another number is pressed, the user is trying to start
+                // a new expression, so we need to clear the running total.
+                if (equalsJustPressed)
+                {
+                    runningTotal = 0;
+                    equalsJustPressed = false;
+                }
+
+                // Number buttons
+                if (sender == button0) button0_Click(sender, e);
+                if (sender == button1) button1_Click(sender, e);
+                if (sender == button2) button2_Click(sender, e);
+                if (sender == button3) button3_Click(sender, e);
+                if (sender == button4) button4_Click(sender, e);
+                if (sender == button5) button5_Click(sender, e);
+                if (sender == button6) button6_Click(sender, e);
+                if (sender == button7) button7_Click(sender, e);
+                if (sender == button8) button8_Click(sender, e);
+                if (sender == button9) button9_Click(sender, e);
+            }
+            else
+            {
+
+                // Operator buttons
+                // first check to see if the user has tried to divide by 0
+                if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
+                {
+                    display.Text = "Cannot divide by zero.";
+                    // set equalsJustPressed to true to simulate C being pressed
+                    equalsJustPressed = true;
+                }
+                else
+                {
+                    if (sender == addButton) addButton_Click(sender, e);
+                    if (sender == subtractButton) subtractButton_Click(sender, e);
+                    if (sender == multiplyButton) multiplyButton_Click(sender, e);
+                    if (sender == divideButton) divideButton_Click(sender, e);
+                }
+            }
+            
+        }
+
+        private void operatorButton_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+/*        private void numButton_Click(object sender, EventArgs e)
+        {
+            lastButtonPressed = (Button) sender;
             if (equalsJustPressed)
             {
                 runningTotal = 0;
@@ -46,7 +118,8 @@ namespace Calculator
             if (sender == button8) button8_Click(sender, e);
             if (sender == button9) button9_Click(sender, e);
 
-        }
+        } 
+*/
 
         private void button0_Click(object sender, EventArgs e)
         {
@@ -162,23 +235,6 @@ namespace Calculator
                     break;
             };
             currentNumber = 0;
-        }
-
-        // Abstracts statements general to clicking any operator button
-        private void operatorButton_Click(object sender, EventArgs e)
-        {
-            if (currentNumber == 0 && currentOperation == Operation.DIVIDE)
-            {
-                display.Font = new Font("Microsoft YaHei UI", 12);
-                display.Text = "Cannot divide by zero. \nPress C to start over.";
-            }
-            else
-            {
-                if (sender == addButton) addButton_Click(sender, e);
-                if (sender == subtractButton) subtractButton_Click(sender, e);
-                if (sender == multiplyButton) multiplyButton_Click(sender, e);
-                if (sender == divideButton) divideButton_Click(sender, e);
-            }
         }
 
         private void addButton_Click(object sender, EventArgs e)
