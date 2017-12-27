@@ -48,6 +48,7 @@ namespace Calculator
             InitializeComponent();
             display.SelectionAlignment = HorizontalAlignment.Right;
             expressionTracker = new ArrayList();
+            this.Focus();
         }
 
         // Converts the argument's text to a character and uses its ASCII key to 
@@ -345,10 +346,29 @@ namespace Calculator
             decimalDivider = 10.0;
         }
 
-        public static void Form1_KeyDown(object sender, KeyEventArgs e) 
+        private void Form1_KeyDown(object sender, KeyEventArgs e) 
         {
-            ((Form1)sender).display.Text = "keypressed";
-            ((Form1)sender).button2.Text = "ke";
+            button9.Focus();
+            if (e.Alt)
+            {
+                display.Text = "9";
+                button2.Text = "8";
+            }
+        }
+
+        private void Form1_KeyDown(object sender, KeyPressEventArgs e)
+        {
+
+        }
+
+        private void button1_KeyDown(object sender, KeyEventArgs e)
+        {
+            display.Text = "xxx";
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
