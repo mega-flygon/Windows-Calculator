@@ -16,6 +16,8 @@ namespace Calculator
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Form1 theForm = new Form1();
+            theForm.KeyDown += Form1.Form1_KeyDown;
             Application.Run(new Form1());
         }
     }

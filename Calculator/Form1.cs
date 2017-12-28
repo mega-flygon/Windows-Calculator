@@ -15,13 +15,32 @@ namespace Calculator
         enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE };
         enum ButtonType { NUMBER, OPERATION, OTHER };
 
+        // Used to track the current number being entered (i.e. between operations/equals.)
         private double currentNumber = 0;
+
+        // Used to track the running total of the expression (displayed after pressing operator or equals.)
         private double runningTotal = 0;
+
+        // Used to track the last operation pressed to properly calculate the running expression.
         private Operation currentOperation = Operation.ADD;
+
+        // Used to keep track of if the decimal button has been pressed.
+        private bool decimalOn = false;
+
+        // Divide the number pressed by this variable to turn it into the proper decimal value.
+        private double decimalDivider = 10.0; // *= 10 after each use.
+
+        // Used to ensure correct behavior for user input after equals has been pressed.
         private bool equalsJustPressed = false; // set this to false everytime it's used in logic
-        private ArrayList expressionTracker; // used to track the expression for displaying
+
+        // Used to track the running expression for display.
+        private ArrayList expressionTracker;
+
         private Button lastButtonPressed;
-        char lastDigitPressed; // used to check for dividing by zero
+
+        // Used to check for dividing by zero.
+        char lastDigitPressed;
+
         char lastButtonPressedText = 'z';
 
         public Form1()
@@ -77,6 +96,10 @@ namespace Calculator
 
                 // Operator buttons
 
+                // An operator button being pressed signifies a new term being added, so the 
+                // decimal-related variables should be reset to default.
+                decimalReset();
+
                 // Test if the user has pressed two operators in a row. If they have, switch to the
                 // else statement which sets currentOperator to the most recent operator selected
                 if (lastButtonPressedText != '+' && lastButtonPressedText != '-'
@@ -106,6 +129,9 @@ namespace Calculator
 
         private void equalsButton_Click(object sender, EventArgs e)
         {
+            // No matter what, reset decimal logic.
+            decimalReset();
+
             // Same logic as in button_Click: check for division by zero.
             if (lastDigitPressed.Equals('0') && currentOperation == Operation.DIVIDE)
             {
@@ -148,8 +174,9 @@ namespace Calculator
 
         private void decimalButton_Click(object sender, EventArgs e)
         {
-            currentNumber = 0;
-            display.Text = "TOO HARD";
+            decimalOn = true;
+            //currentNumber = 0;
+            //display.Text = "TOO HARD";
         }
 
         private void addButton_Click(object sender, EventArgs e)
@@ -212,6 +239,7 @@ namespace Calculator
 
         private void clearButton_Click(object sender, EventArgs e)
         {
+            decimalReset();
             currentNumber = 0;
             runningTotal = 0;
             expressionTracker.Clear();
@@ -230,8 +258,16 @@ namespace Calculator
 
         private void button1_Click(object sender, EventArgs e)
         {
-            currentNumber *= 10;
-            currentNumber += 1;
+            if (decimalOn)
+            {
+                currentNumber += (1.0 / decimalDivider);
+                decimalDivider *= 10.0;
+            }
+            else
+            {
+                currentNumber *= 10;
+                currentNumber += 1;
+            }
             display.Text = Convert.ToString(currentNumber);
             display.SelectionAlignment = HorizontalAlignment.Right;
         }
@@ -298,6 +334,21 @@ namespace Calculator
             currentNumber += 9;
             display.Text = Convert.ToString(currentNumber);
             display.SelectionAlignment = HorizontalAlignment.Right;
+        }
+
+        // Encapsulates the reset of decimalOn and decimalPlaces into one line. This adds safety 
+        // because both variables should be reset any time one should be reset. Calling this function
+        // ensures that this is also the case, and also reduces the lines of code and is more semantic.
+        private void decimalReset() 
+        {
+            decimalOn = false;
+            decimalDivider = 10.0;
+        }
+
+        public static void Form1_KeyDown(object sender, KeyEventArgs e) 
+        {
+            ((Form1)sender).display.Text = "keypressed";
+            ((Form1)sender).button2.Text = "ke";
         }
     }
 }
